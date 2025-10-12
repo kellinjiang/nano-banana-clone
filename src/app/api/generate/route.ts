@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 				},
 			],
 			// 关键参数:指定需要生成图片
-			modalities: ["image", "text"] as any,
+			modalities: ["image", "text"] as unknown as never,
 		});
 
 		console.log("API 完整响应:", JSON.stringify(completion, null, 2));
@@ -67,20 +67,22 @@ export async function POST(req: NextRequest) {
 		let generatedImage = null;
 
 		// 1. 优先检查 message.images 字段(图片生成的标准位置)
-		if ((message as any)?.images && Array.isArray((message as any).images)) {
-			const images = (message as any).images;
+		const messageWithImages = message as { images?: unknown[] };
+		if (messageWithImages?.images && Array.isArray(messageWithImages.images)) {
+			const images = messageWithImages.images;
 			console.log("找到 images 数组:", images.length, "张图片");
 
 			if (images[0]) {
+				const firstImage = images[0] as { image_url?: { url?: string }; url?: string } | string;
 				// 图片可能在 image_url.url 或直接是字符串
-				if (images[0].image_url?.url) {
-					generatedImage = images[0].image_url.url;
+				if (typeof firstImage === "object" && firstImage.image_url?.url) {
+					generatedImage = firstImage.image_url.url;
 					console.log("从 images[0].image_url.url 获取图片");
-				} else if (typeof images[0] === "string") {
-					generatedImage = images[0];
+				} else if (typeof firstImage === "string") {
+					generatedImage = firstImage;
 					console.log("从 images[0] 获取图片");
-				} else if (images[0].url) {
-					generatedImage = images[0].url;
+				} else if (typeof firstImage === "object" && firstImage.url) {
+					generatedImage = firstImage.url;
 					console.log("从 images[0].url 获取图片");
 				}
 			}
@@ -116,8 +118,9 @@ export async function POST(req: NextRequest) {
 			else if (Array.isArray(messageContent)) {
 				console.log("Content 是数组:", messageContent);
 				for (const item of messageContent) {
-					if (item.type === "image_url" && item.image_url?.url) {
-						generatedImage = item.image_url.url;
+					const contentItem = item as { type?: string; image_url?: { url?: string } };
+					if (contentItem.type === "image_url" && contentItem.image_url?.url) {
+						generatedImage = contentItem.image_url.url;
 						console.log("从 content 数组中提取图片 URL:", generatedImage);
 						break;
 					}
@@ -128,13 +131,14 @@ export async function POST(req: NextRequest) {
 		if (!generatedImage) {
 			console.error("无法从响应中提取图片");
 			console.error("完整响应结构:", JSON.stringify(completion, null, 2));
+			const messageDebug = message as { images?: unknown };
 			return NextResponse.json(
 				{
 					error: "生成图片失败: API 没有返回图片内容",
 					debug: {
 						hasChoice: !!choice,
 						hasMessage: !!message,
-						hasImages: !!(message as any)?.images,
+						hasImages: !!messageDebug?.images,
 						hasContent: !!messageContent,
 						contentType: typeof messageContent,
 						messageContent: messageContent,

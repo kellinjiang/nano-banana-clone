@@ -14,7 +14,7 @@ const DropdownMenu = ({ children }: DropdownMenuProps) => {
     <div className="relative">
       {React.Children.map(children, (child) =>
         React.isValidElement(child)
-          ? React.cloneElement(child as React.ReactElement<any>, { isOpen, setIsOpen })
+          ? React.cloneElement(child as React.ReactElement<{ isOpen?: boolean; setIsOpen?: (open: boolean) => void }>, { isOpen, setIsOpen })
           : child
       )}
     </div>
