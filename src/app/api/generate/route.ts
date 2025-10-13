@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// 2. 检查 content 字段
-		const messageContent = message?.content;
+		const messageContent: unknown = message?.content;
 		if (!generatedImage && messageContent) {
 			console.log("Message content:", messageContent);
 			console.log("Message content type:", typeof messageContent);
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
 			// 检查 content 是否是数组
 			else if (Array.isArray(messageContent)) {
 				console.log("Content 是数组:", messageContent);
-				for (const item of messageContent) {
+				for (const item of messageContent as unknown[]) {
 					const contentItem = item as { type?: string; image_url?: { url?: string } };
 					if (contentItem.type === "image_url" && contentItem.image_url?.url) {
 						generatedImage = contentItem.image_url.url;
