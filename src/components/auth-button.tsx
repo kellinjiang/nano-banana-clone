@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -10,7 +10,7 @@ export function AuthButton() {
 	const supabase = createClient();
 
 	// 获取当前用户
-	useState(() => {
+	useEffect(() => {
 		supabase.auth.getUser().then(({ data: { user } }) => {
 			setUser(user);
 		});
@@ -23,7 +23,7 @@ export function AuthButton() {
 		});
 
 		return () => subscription.unsubscribe();
-	});
+	}, [supabase]);
 
 	const handleLogin = async () => {
 		setLoading(true);
