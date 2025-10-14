@@ -8,6 +8,18 @@ export async function POST(request: Request) {
 	const origin = request.headers.get("origin");
 	const forwardedHost = request.headers.get("x-forwarded-host");
 	const forwardedProto = request.headers.get("x-forwarded-proto");
+	const host = request.headers.get("host");
+	const referer = request.headers.get("referer");
+
+	// 调试日志
+	console.log("Google Login - Headers:", {
+		origin,
+		forwardedHost,
+		forwardedProto,
+		host,
+		referer,
+		requestUrl: request.url,
+	});
 
 	// 优先使用 forwarded headers (Vercel 部署环境)
 	let redirectUrl: string;
@@ -15,10 +27,16 @@ export async function POST(request: Request) {
 		redirectUrl = `${forwardedProto}://${forwardedHost}/auth/callback`;
 	} else if (origin) {
 		redirectUrl = `${origin}/auth/callback`;
+	} else if (host) {
+		// 如果有 host header,使用它
+		const protocol = host.includes("localhost") ? "http" : "https";
+		redirectUrl = `${protocol}://${host}/auth/callback`;
 	} else {
 		// 后备方案
 		redirectUrl = `${new URL(request.url).origin}/auth/callback`;
 	}
+
+	console.log("Google Login - Redirect URL:", redirectUrl);
 
 	const { data, error } = await supabase.auth.signInWithOAuth({
 		provider: "google",
