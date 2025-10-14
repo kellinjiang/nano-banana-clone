@@ -25,10 +25,10 @@ export function AuthButton() {
 		return () => subscription.unsubscribe();
 	}, [supabase]);
 
-	const handleLogin = async () => {
+	const handleLogin = async (provider: "github" | "google") => {
 		setLoading(true);
 		try {
-			const response = await fetch("/auth/login", {
+			const response = await fetch(`/auth/${provider}`, {
 				method: "POST",
 			});
 			const { url } = await response.json();
@@ -73,8 +73,18 @@ export function AuthButton() {
 	}
 
 	return (
-		<Button onClick={handleLogin} disabled={loading} size="sm">
-			{loading ? "登录中..." : "使用 GitHub 登录"}
-		</Button>
+		<div className="flex items-center gap-2">
+			<Button
+				onClick={() => handleLogin("github")}
+				disabled={loading}
+				size="sm"
+				variant="outline"
+			>
+				{loading ? "登录中..." : "GitHub 登录"}
+			</Button>
+			<Button onClick={() => handleLogin("google")} disabled={loading} size="sm">
+				{loading ? "登录中..." : "Google 登录"}
+			</Button>
+		</div>
 	);
 }
