@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Sparkles, Zap, MessageSquare, Image, Target, Layers, Edit3, Repeat, Star, Menu } from "lucide-react";
 import EditorSection from "@/components/EditorSection";
+import { AuthButton } from "@/components/auth-button";
 
 export default function Home() {
   return (
@@ -43,9 +44,7 @@ export default function Home() {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-4">
-              <Button variant="outline" className="hidden sm:inline-flex">
-                Sign In
-              </Button>
+              <AuthButton />
               <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Launch Now
