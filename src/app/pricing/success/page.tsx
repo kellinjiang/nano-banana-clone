@@ -36,8 +36,8 @@ export default function PaymentSuccess() {
 
           setPaymentDetails({
             isMock: true,
-            plan,
-            period,
+            plan: plan ?? undefined,
+            period: period ?? undefined,
             message: "这是 Mock 支付模式 - 仅用于测试",
           });
           setIsVerifying(false);

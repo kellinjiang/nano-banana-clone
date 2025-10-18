@@ -121,12 +121,16 @@ const validation: Record<string, {
 
 ### 4. `src/app/pricing/success/page.tsx` ✅
 
-**问题：** Payment details 状态使用了 `any` 类型（第 12 行）
+**问题：**
+1. Payment details 状态使用了 `any` 类型（第 23 行）
+2. `searchParams.get()` 返回 `string | null` 但接口期望 `string | undefined`（第 39-40 行）
 
-**修复：** 定义了 `PaymentDetails` 接口
+**修复：**
+1. 定义了 `PaymentDetails` 接口
+2. 使用空值合并运算符 `??` 将 `null` 转换为 `undefined`
 
 ```typescript
-// 添加接口定义
+// 1. 添加接口定义
 interface PaymentDetails {
   isMock?: boolean;
   plan?: string;
@@ -138,11 +142,35 @@ interface PaymentDetails {
   productId?: string;
 }
 
+// 2. 修改状态类型
 // 修改前
 const [paymentDetails, setPaymentDetails] = useState<any>(null);
 
 // 修改后
 const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+
+// 3. 处理 null 值
+// 修改前
+const plan = searchParams.get("plan");
+const period = searchParams.get("period");
+
+setPaymentDetails({
+  isMock: true,
+  plan,
+  period,
+  message: "这是 Mock 支付模式 - 仅用于测试",
+});
+
+// 修改后
+const plan = searchParams.get("plan");
+const period = searchParams.get("period");
+
+setPaymentDetails({
+  isMock: true,
+  plan: plan ?? undefined,
+  period: period ?? undefined,
+  message: "这是 Mock 支付模式 - 仅用于测试",
+});
 ```
 
 ---
