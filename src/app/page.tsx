@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Sparkles, Zap, MessageSquare, Image, Target, Layers, Edit3, Repeat, Star, Menu } from "lucide-react";
+import { Sparkles, Zap, MessageSquare, Image, Target, Layers, Edit3, Repeat, Star, Menu } from "lucide-react";
 import EditorSection from "@/components/EditorSection";
 import { AuthButton } from "@/components/auth-button";
 
@@ -24,22 +23,9 @@ export default function Home() {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Image Editor</a>
-              <a href="#showcase" className="text-gray-700 hover:text-orange-600 transition-colors">Showcase</a>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center space-x-1 text-gray-700 hover:text-orange-600 transition-colors">
-                  <span>Toolbox</span>
-                  <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem>Batch Editor</DropdownMenuItem>
-                  <DropdownMenuItem>Background Remover</DropdownMenuItem>
-                  <DropdownMenuItem>Features</DropdownMenuItem>
-                  <DropdownMenuItem>FAQ</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">Pricing</a>
-              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">API</a>
+              <a href="#" className="text-gray-700 hover:text-orange-600 transition-colors">图片编辑</a>
+              <a href="#showcase" className="text-gray-700 hover:text-orange-600 transition-colors">案例展示</a>
+              <a href="/pricing" className="text-gray-700 hover:text-orange-600 transition-colors">定价</a>
             </nav>
 
             {/* Action Buttons */}

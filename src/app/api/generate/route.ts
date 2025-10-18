@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createClient } from "@/lib/supabase/server";
+import { deductCredits } from "@/lib/credits/manager";
 
 // 配置 Next.js API 路由的最大执行时间
 export const maxDuration = 120; // 120 秒
@@ -18,6 +20,21 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
 	try {
+		// 1. 验证用户身份
+		const supabase = await createClient();
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser();
+
+		if (authError || !user) {
+			return NextResponse.json(
+				{ error: "未授权访问，请先登录" },
+				{ status: 401 },
+			);
+		}
+
+		// 2. 解析请求参数
 		const { image, prompt } = await req.json();
 
 		if (!image || !prompt) {
@@ -26,6 +43,34 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			);
 		}
+
+		// 3. 扣除 Credits (1 credit per generation)
+		const deductResult = await deductCredits({
+			userId: user.id,
+			amount: 1,
+			operationType: "image_generation",
+			metadata: {
+				prompt: prompt.substring(0, 200), // 只保存前 200 字符
+				model: "google/gemini-2.5-flash-image-preview",
+			},
+		});
+
+		if (!deductResult.success) {
+			return NextResponse.json(
+				{
+					error: deductResult.error || "Credits 余额不足",
+					remaining: deductResult.remaining,
+					needsTopUp: true,
+				},
+				{ status: 402 }, // 402 Payment Required
+			);
+		}
+
+		console.log("Credits 扣除成功:", {
+			source: deductResult.source,
+			remaining: deductResult.remaining,
+			free_generation: deductResult.free_generation_used,
+		});
 
 		console.log("开始调用 API...");
 		console.log("Prompt:", prompt);
@@ -153,6 +198,12 @@ export async function POST(req: NextRequest) {
 			success: true,
 			image: generatedImage,
 			rawContent: messageContent,
+			credits: {
+				used: 1,
+				remaining: deductResult.remaining,
+				source: deductResult.source,
+				was_free: deductResult.free_generation_used || false,
+			},
 		});
 	} catch (error) {
 		console.error("API 错误详情:", error);
