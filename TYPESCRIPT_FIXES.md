@@ -124,10 +124,12 @@ const validation: Record<string, {
 **问题：**
 1. Payment details 状态使用了 `any` 类型（第 23 行）
 2. `searchParams.get()` 返回 `string | null` 但接口期望 `string | undefined`（第 39-40 行）
+3. `useSearchParams()` 必须在 Suspense 边界内使用（Next.js 15 要求）
 
 **修复：**
 1. 定义了 `PaymentDetails` 接口
 2. 使用空值合并运算符 `??` 将 `null` 转换为 `undefined`
+3. 将组件拆分为 `PaymentSuccessContent` 和外层 `PaymentSuccess`，使用 `<Suspense>` 包裹
 
 ```typescript
 // 1. 添加接口定义
@@ -171,6 +173,27 @@ setPaymentDetails({
   period: period ?? undefined,
   message: "这是 Mock 支付模式 - 仅用于测试",
 });
+
+// 4. 添加 Suspense 边界
+// 修改前
+export default function PaymentSuccess() {
+  const searchParams = useSearchParams(); // ❌ 错误：必须在 Suspense 内
+  // ...
+}
+
+// 修改后
+function PaymentSuccessContent() {
+  const searchParams = useSearchParams(); // ✅ 在 Suspense 边界内
+  // ... 所有原有逻辑
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense fallback={<LoadingUI />}>
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}
 ```
 
 ---
@@ -230,8 +253,12 @@ npm run lint
 | `src/app/api/webhooks/creem/route.ts` | 6 | 函数参数 `any` → `CreemWebhookData` |
 | `src/types/credits.ts` | 3 | `Record<string, any>` → `Record<string, unknown>` |
 | `src/app/api/checkout/test-config/route.ts` | 2 | `any` → 明确类型 |
-| `src/app/pricing/success/page.tsx` | 1 | `any` → `PaymentDetails` 接口 |
-| **总计** | **12 处** | - |
+| `src/app/pricing/success/page.tsx` | 3 | `any` → `PaymentDetails` 接口 + null 处理 + Suspense |
+| **总计** | **14 处** | - |
+
+### 额外修复（Next.js 15 兼容性）
+- ✅ 添加 Suspense 边界以支持 `useSearchParams()` hook
+- ✅ 组件架构重构：分离为展示组件和包装组件
 
 ---
 
@@ -284,6 +311,35 @@ function handleData(data: CreemWebhookData) {
 }
 ```
 
+### 4. Next.js 15 中使用 useSearchParams
+在 Next.js 15 中，使用 `useSearchParams()` 必须包裹在 Suspense 边界内：
+
+```typescript
+// ❌ 错误：直接使用会导致构建错误
+export default function Page() {
+  const searchParams = useSearchParams();
+  return <div>{searchParams.get("id")}</div>;
+}
+
+// ✅ 正确：使用 Suspense 包裹
+import { Suspense } from "react";
+
+function PageContent() {
+  const searchParams = useSearchParams();
+  return <div>{searchParams.get("id")}</div>;
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <PageContent />
+    </Suspense>
+  );
+}
+```
+
+**原因：** Next.js 15 需要明确的 Suspense 边界来处理动态内容加载，避免 hydration 不匹配问题。
+
 ---
 
 ## 🚀 下一步
@@ -308,5 +364,6 @@ function handleData(data: CreemWebhookData) {
 ---
 
 **修复完成时间**: 2025-10-18
-**版本**: v1.2
-**状态**: ✅ 所有 TypeScript ESLint 错误已修复
+**版本**: v1.3
+**状态**: ✅ 所有 TypeScript ESLint 错误已修复 + Next.js 15 Suspense 兼容性修复
+**构建状态**: ✅ `npm run build` 成功通过

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ interface PaymentDetails {
   productId?: string;
 }
 
-export default function PaymentSuccess() {
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const [isVerifying, setIsVerifying] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
@@ -148,7 +148,7 @@ export default function PaymentSuccess() {
         </h1>
         <p className="text-muted-foreground mb-6">
           {paymentDetails?.isMock
-            ? "这是 Mock 支付测试模式。在生产环境中，此处将显示真实的支付确认信息。"
+            ? "这是 Mock 支付测试模式。在生产环境中,此处将显示真实的支付确认信息。"
             : "Thank you for your subscription. Your account has been upgraded."}
         </p>
 
@@ -206,5 +206,23 @@ export default function PaymentSuccess() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-16 w-16 animate-spin mx-auto mb-4 text-primary" />
+            <h2 className="text-2xl font-semibold mb-2">Loading...</h2>
+            <p className="text-muted-foreground">Please wait a moment</p>
+          </div>
+        </div>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }
