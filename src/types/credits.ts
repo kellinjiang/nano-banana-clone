@@ -37,7 +37,7 @@ export interface DeductCreditsParams {
   /** 操作类型 */
   operationType: "image_generation" | "image_upscale" | "image_variation";
   /** 元数据（如 prompt、model、resolution 等） */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -96,7 +96,7 @@ export interface UsageLog {
   deducted_from_subscription: number;
   deducted_from_purchased: number;
   deducted_from_bonus: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 }
 
@@ -142,7 +142,7 @@ export interface Transaction {
   provider_customer_id?: string;
   subscription_id?: string;
   credit_pack_id?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   completed_at?: string;
   created_at: string;
   updated_at: string;

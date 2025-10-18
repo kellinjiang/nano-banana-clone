@@ -3,6 +3,20 @@ import type { NextRequest } from "next/server";
 import crypto from "crypto";
 
 /**
+ * Creem Webhook 事件数据类型
+ */
+interface CreemWebhookData {
+  checkout_id?: string;
+  subscription_id?: string;
+  customer_id?: string;
+  product_id?: string;
+  status?: string;
+  credits?: number;
+  reason?: string;
+  [key: string]: unknown;
+}
+
+/**
  * Creem Webhook 处理器
  * 接收来自 Creem 的支付事件通知
  */
@@ -80,14 +94,14 @@ export async function POST(request: NextRequest) {
 }
 
 // 处理支付完成事件
-async function handleCheckoutCompleted(data: any) {
+async function handleCheckoutCompleted(data: CreemWebhookData) {
   console.log("Checkout completed:", data);
   // TODO: 更新数据库中的订单状态
   // await updateOrderStatus(data.checkout_id, 'completed');
 }
 
 // 处理订阅创建事件
-async function handleSubscriptionCreated(data: any) {
+async function handleSubscriptionCreated(data: CreemWebhookData) {
   console.log("Subscription created:", data);
   // TODO: 在数据库中创建订阅记录
   // await createSubscription({
@@ -99,28 +113,28 @@ async function handleSubscriptionCreated(data: any) {
 }
 
 // 处理订阅更新事件
-async function handleSubscriptionUpdated(data: any) {
+async function handleSubscriptionUpdated(data: CreemWebhookData) {
   console.log("Subscription updated:", data);
   // TODO: 更新数据库中的订阅信息
   // await updateSubscription(data.subscription_id, data);
 }
 
 // 处理订阅取消事件
-async function handleSubscriptionCancelled(data: any) {
+async function handleSubscriptionCancelled(data: CreemWebhookData) {
   console.log("Subscription cancelled:", data);
   // TODO: 更新数据库中的订阅状态
   // await updateSubscriptionStatus(data.subscription_id, 'cancelled');
 }
 
 // 处理支付成功事件
-async function handlePaymentSucceeded(data: any) {
+async function handlePaymentSucceeded(data: CreemWebhookData) {
   console.log("Payment succeeded:", data);
   // TODO: 记录支付成功,更新用户积分
   // await addCreditsToUser(data.customer_id, data.credits);
 }
 
 // 处理支付失败事件
-async function handlePaymentFailed(data: any) {
+async function handlePaymentFailed(data: CreemWebhookData) {
   console.log("Payment failed:", data);
   // TODO: 记录支付失败,通知用户
   // await notifyPaymentFailure(data.customer_id, data.reason);
