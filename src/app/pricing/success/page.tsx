@@ -6,10 +6,21 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
+interface PaymentDetails {
+  isMock?: boolean;
+  plan?: string;
+  period?: string;
+  message?: string;
+  orderId?: string;
+  subscriptionId?: string;
+  customerId?: string;
+  productId?: string;
+}
+
 export default function PaymentSuccess() {
   const searchParams = useSearchParams();
   const [isVerifying, setIsVerifying] = useState(true);
-  const [paymentDetails, setPaymentDetails] = useState<any>(null);
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

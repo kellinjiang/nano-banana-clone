@@ -55,10 +55,15 @@ export async function GET() {
     };
 
     const productIds = Array.isArray(products.data)
-      ? products.data.map((p: any) => p.id)
+      ? products.data.map((p: { id: string }) => p.id)
       : [];
 
-    const validation: Record<string, any> = {};
+    const validation: Record<string, {
+      configured: boolean;
+      exists: boolean;
+      productId?: string;
+      message: string;
+    }> = {};
     for (const [key, productId] of Object.entries(configuredProducts)) {
       if (!productId) {
         validation[key] = {

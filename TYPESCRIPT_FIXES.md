@@ -6,7 +6,7 @@
 
 错误提示：`Error: Unexpected any. Specify a different type.`
 
-## 📋 修复的文件
+## 📋 修复的文件（共 4 个）
 
 ### 1. `src/app/api/webhooks/creem/route.ts` ✅
 
@@ -84,6 +84,69 @@ metadata?: Record<string, unknown>;
 
 ---
 
+### 3. `src/app/api/checkout/test-config/route.ts` ✅
+
+**问题：** 2 处使用了 `any` 类型（第 58 和 61 行）
+
+**修复：**
+
+**第 58 行 - Product ID 映射：**
+```typescript
+// 修改前
+const productIds = Array.isArray(products.data)
+  ? products.data.map((p: any) => p.id)
+  : [];
+
+// 修改后
+const productIds = Array.isArray(products.data)
+  ? products.data.map((p: { id: string }) => p.id)
+  : [];
+```
+
+**第 61 行 - Validation 对象类型：**
+```typescript
+// 修改前
+const validation: Record<string, any> = {};
+
+// 修改后
+const validation: Record<string, {
+  configured: boolean;
+  exists: boolean;
+  productId?: string;
+  message: string;
+}> = {};
+```
+
+---
+
+### 4. `src/app/pricing/success/page.tsx` ✅
+
+**问题：** Payment details 状态使用了 `any` 类型（第 12 行）
+
+**修复：** 定义了 `PaymentDetails` 接口
+
+```typescript
+// 添加接口定义
+interface PaymentDetails {
+  isMock?: boolean;
+  plan?: string;
+  period?: string;
+  message?: string;
+  orderId?: string;
+  subscriptionId?: string;
+  customerId?: string;
+  productId?: string;
+}
+
+// 修改前
+const [paymentDetails, setPaymentDetails] = useState<any>(null);
+
+// 修改后
+const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+```
+
+---
+
 ## 🔍 为什么使用 `unknown` 而不是 `any`
 
 ### `any` vs `unknown` 的区别：
@@ -138,7 +201,9 @@ npm run lint
 |------|---------|------|
 | `src/app/api/webhooks/creem/route.ts` | 6 | 函数参数 `any` → `CreemWebhookData` |
 | `src/types/credits.ts` | 3 | `Record<string, any>` → `Record<string, unknown>` |
-| **总计** | **9 处** | - |
+| `src/app/api/checkout/test-config/route.ts` | 2 | `any` → 明确类型 |
+| `src/app/pricing/success/page.tsx` | 1 | `any` → `PaymentDetails` 接口 |
+| **总计** | **12 处** | - |
 
 ---
 
